@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE script:module PUBLIC "-//OpenOffice.org//DTD OfficeDocument 1.0//EN" "module.dtd">
+<script:module xmlns:script="http://openoffice.org/2000/script" script:name="Main" script:language="StarBasic" script:moduleType="normal">REM  *****  BASIC  *****
+REM sInPath specifies the initial directory. If the initial directory
+REM is not specified, then the user&apos;s default work directory is used.
+REM The selected directory is returned as a URL.
+Function ChooseADirectory(Optional sInPath$) As String
+  Dim oDialog As Object
+  Dim oSFA As Object
+  Dim s As String
+  Dim oPathSettings
+  Dim oContext
+
+  oDialog = CreateUnoService(&quot;com.sun.star.ui.dialogs.FolderPicker&quot;)
+  &apos;oDialog = CreateUnoService(&quot;com.sun.star.ui.dialogs.OfficeFolderPicker&quot;)
+  oSFA = createUnoService(&quot;com.sun.star.ucb.SimpleFileAccess&quot;)
+ 
+  If IsMissing(sInPath) Then
+    &apos;oPathSettings = CreateUnoService(&quot;com.sun.star.util.PathSettings&quot;)
+    oContext = getProcessServiceManager().DefaultContext
+    oPathSettings = oContext.getValueByName(&quot;/singletons/com.sun.star.util.thePathSettings&quot;)
+    oDialog.setDisplayDirectory(oPathSettings.Work)
+  ElseIf oSFA.Exists(sInPath) Then
+    oDialog.setDisplayDirectory(sInPath)
+  Else
+    s = &quot;Directory &apos;&quot; &amp; sInPath &amp; &quot;&apos; Does not exist&quot;
+    If MsgBox(s, 33, &quot;Error&quot;) = 2 Then Exit Function
+  End If
+ 
+  If oDialog.Execute() = 1 Then
+    ChooseADirectory() = oDialog.getDirectory()
+  End If
+End Function
+
+Function write_data_dir_to_rc(_rc_path$, _data_dir$) as Boolean
+	Dim status as Boolean
+	Dim n As Integer &apos;Holds the file number
+
+  On Error GoTo ExErrorHandler
+	
+	n = FreeFile() &apos;Next free file number
+	Open _rc_path For Output Access Read Write As #n &apos;Open for read/write
+	Write #n, _data_dir
+	Close #n
+
+	REM запись в uri + в кавычках (не важно)
+	status = True
+	write_data_dir_to_rc = status
+	exit Function
+	
+  ExErrorHandler:
+	status = False	
+	write_data_dir_to_rc = status
+	exit Function
+	
+End Function
+
+Function get_data_dir as String
+	Dim oPathSub
+	Dim home_config_dir, cfg_file_name, cfg_file_path, data_dir
+	Dim oSFA As Object
+	Dim res as Boolean
+	oSFA = createUnoService(&quot;com.sun.star.ucb.SimpleFileAccess&quot;)
+	oPathSub = CreateUnoService(&quot;com.sun.star.util.PathSubstitution&quot;)
+	home_config_dir = oPathSub.getSubstituteVariableValue(&quot;user&quot;)
+	cfg_file_name = &quot;csl2pdf.rc&quot;
+	cfg_file_path = home_config_dir  &amp; GetPathSeparator() &amp; cfg_file_name
+
+	REM проверка на существование.
+	If not oSFA.Exists(cfg_file_path) Then
+	REM Если файла нет, то создать его и занести в него выбранный каталог.
+		REM Выбор каталога
+		MsgBox(&quot;Укажите каталог скрипта csl2tex.py&quot;)
+		data_dir = ChooseADirectory()
+		res = write_data_dir_to_rc(cfg_file_path, data_dir)
+		If res = False Then
+			MsgBox(&quot;Проблема записи в rc-файл!&quot;)
+			get_data_dir = &quot;&quot;	
+		Else 
+			get_data_dir = read_data_path_from_rc(cfg_file_path)
+		End IF
+	Else
+		get_data_dir = read_data_path_from_rc(cfg_file_path)
+	End IF
+
+End Function
+
+Function read_data_path_from_rc(_cfg_file_path$) as String
+	Dim data_dir_from_rc$
+	Dim n% 
+	
+	n = FreeFile
+	Open _cfg_file_path For Input As #n
+	Do While NOT EOF(n)
+		Input #n, data_dir_from_rc
+		REM Process the input here!
+	Loop
+	read_data_path_from_rc = data_dir_from_rc
+	
+End Function
+
+
+Sub run(_para$)
+	Dim s$, sScript$, sQuoted$, py_sScript$
+	Dim res
+	dim cURI, cURL, pdf_url
+	dim oDoc
+	dim data_dir$
+	Dim params$
+	Dim oSFA As Object
+	Dim sBase$, sExt$
+	Dim vName As Variant			&apos;	Array of trunks of sName
+	
+	oSFA = createUnoService(&quot;com.sun.star.ucb.SimpleFileAccess&quot;)
+	oDoc=ThisComponent
+	cURI=oDoc.URL
+	cURL=ConvertFromURL(cURI)
+	
+	&apos; Для получения pdf filname 
+	&apos;If Len(cURL) &gt; 0 Then
+	&apos;	If InStr(cURL, &quot;.&quot;) &gt; 0 Then
+	&apos;		vName = Split(cURL, &quot;.&quot;)
+	&apos;		sExt = vName(UBound(vName))
+	&apos;		sBase = Left(cURL, Len(cURL) - Len(sExt) - 1)
+	&apos;	Else
+	&apos;		sBase = sName
+	&apos;	End If
+	&apos;End If
+	&apos;pdf_url = sBase &amp; &quot;.pdf&quot;
+		
+	data_dir = get_data_dir()
+	If data_dir = &quot;&quot; Then
+		MsgBox(&quot;Не найден каталог data_dir!&quot;)
+		Exit Sub
+	EndIF
+	data_dir = ConvertFromURL(data_dir)
+	_py_sScript = data_dir &amp; GetPathSeparator() &amp; &quot;csl2tex.py&quot;
+	If not oSFA.Exists(_py_sScript) Then
+		MsgBox(&quot;Не найден скрипт csl2tex.py!&quot;)
+		Exit sub	
+	EndIf
+	
+	If _para = &quot;red&quot; Then
+		params = &quot; -p&quot;
+	ElseIf _para = &quot;black&quot; Then
+		params = &quot; -p -b&quot;
+	ElseIf _para = &quot;gui&quot; Then
+		params = &quot; -g&quot;
+	End If 
+	py_sScript = _py_sScript &amp; params
+	
+	sScript = &quot;python -E &quot; &amp; py_sScript
+	sQuoted = &quot;&quot;&quot;&quot; &amp; cURL &amp; &quot;&quot;&quot;&quot;
+	res = Shell(sScript, 2, sQuoted)
+	
+	REM Нет возможности отследить окончание выполнения скрипта.
+	REM поэтому попытка после паузы (5сек) проверить наличие pdf.
+	REM Однако компиляция более длинного док-та займет больше времени
+	REM =&gt; оставить пока только функцию с gui для однозначного контроля.
+	rem Wait(5000)
+	rem Проверка .pdf
+	rem If _para &lt;&gt; &quot;gui&quot; Then
+	rem 	If oSFA.Exists(pdf_url) Then
+	rem 		MsgBox(&quot;Pdf compiled!&quot;)
+	rem 	End If
+	rem End If
+	
+End Sub
+
+sub run_red
+	run(&quot;red&quot;)
+End Sub
+
+Sub run_black
+	run(&quot;black&quot;)
+End Sub
+
+Sub run_gui
+	run(&quot;gui&quot;)
+End Sub
+
+</script:module>
