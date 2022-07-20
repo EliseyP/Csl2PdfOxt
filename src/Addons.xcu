@@ -6,6 +6,8 @@
  oor:name="Addons" oor:package="org.openoffice.Office">
 
   <node oor:name="AddonUI">
+      
+    
       <node oor:name="AddonMenu">
          <node oor:name="org.elisey.Csl2Pdf.N001" oor:op="replace">
             <prop oor:name="Context" oor:type="xs:string">

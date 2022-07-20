@@ -6,7 +6,7 @@
 	<identifier value="org.elisey.Csl2Pdf"/>
 	<version value="0.0.4"/>
   <update-information>
-    <src xlink:href="https://github.com/EliseyP/Csl2PdfOxt/raw/master/Csl2Pdf.update.xml" />
+    <src xlink:href="https://github.com/EliseyP/Csl2PdfOxt/raw/main/Csl2Pdf.update.xml" />
   </update-information>
 
   <publisher>
