@@ -1,14 +1,17 @@
 #!/usr/bin/env python
+"""Сборка расширения oxt в каталоге src.
+
+"""
+# TODO: version.
 
 import os
 from shutil import make_archive, copy, copytree, rmtree
-from zipfile import ZipFile
-# from distutils.dir_util import copy_tree
 from pathlib import Path
 
 ext_name = 'Csl2Pdf'
+zip_file = Path(f'{ext_name}.zip')
 ext_file_name = Path(f'{ext_name}.oxt')
-_tmp_dir_path = Path('tmp~~')
+tmp_dir_path = Path('tmp~~')
 
 dirs_list = [
     'Csl2Pdf',
@@ -24,43 +27,56 @@ files_list = [
 ]
 update_file_name = f'{ext_name}.update.xml'
 
+
 def main():
     try:
         os.chdir('src')
     except Exception as e:
         print(f'Error {e}')
+        return
     
     try:
-        _tmp_dir_path.mkdir(exist_ok=True)
+        tmp_dir_path.mkdir(exist_ok=True)
     except Exception as e:
         print(f'Error {e}')
-
-    # try:
-    #     os.chdir('src')
-    # except Exception as e:
-    #     print(f'Error {e}')
+        return
 
     for _dir in dirs_list:
-        # copy_tree(_dir, _tmp_dir_path.as_posix())
-        copytree(_dir, _tmp_dir_path.joinpath(_dir).as_posix(), dirs_exist_ok=True)
+        try:
+            copytree(_dir, tmp_dir_path.joinpath(_dir).as_posix(), dirs_exist_ok=True)
+        except Exception as e:
+            print(f'Error {e}')
+            return
 
     for _file in files_list:
-        copy(_file, _tmp_dir_path.as_posix())    
+        try:
+            copy(_file, tmp_dir_path.as_posix())
+        except Exception as e:
+            print(f'Error {e}')
+            return
 
     try:
-        print(f'Zip tmp dir ... ', end='')
-        make_archive(base_name=ext_name, format='zip', root_dir=_tmp_dir_path)
-    except Exception as err:
+        print(f'Make OXT ... ', end='')
+        make_archive(base_name=ext_name, format='zip', root_dir=tmp_dir_path)
+    except Exception as e:
         print('NO')
-        # raise MyErrorOperation from err
     else:
+
+        if zip_file.exists:
+            zip_file.rename(ext_file_name)
         print('OK')
+        try:
+            copy(ext_file_name, '..')
+        except Exception as e:
+            print(f'Error {e}')
 
-    zip_file = Path(f'{ext_name}.zip')
-    if zip_file.exists:
-        zip_file.rename(f'{ext_name}.oxt')
+    finally:
+        try:
+            rmtree(tmp_dir_path)
+        except Exception as er:
+            print(f'Error {er}')
+        return
 
-    rmtree(_tmp_dir_path)
 
 if __name__ == '__main__':
     main()
