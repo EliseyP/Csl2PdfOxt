@@ -4,6 +4,7 @@
 REM sInPath specifies the initial directory. If the initial directory
 REM is not specified, then the user&apos;s default work directory is used.
 REM The selected directory is returned as a URL.
+Option Explicit 
 Function ChooseADirectory(Optional sInPath$) As String
   Dim oDialog As Object
   Dim oSFA As Object
@@ -101,14 +102,15 @@ End Function
 
 
 Sub run(_para$)
-	Dim s$, sScript$, sQuoted$, py_sScript$
+	Dim s$, sScript$, sQuoted$, py_sScript$, _py_sScript$
 	Dim res
-	dim cURI, cURL, pdf_url
+	dim cURI, cURL 
+	REM Dim pdf_url
 	dim oDoc
 	dim data_dir$
 	Dim params$
 	Dim oSFA As Object
-	Dim sBase$, sExt$
+	rem Dim sBase$, sExt$
 	Dim vName As Variant			&apos;	Array of trunks of sName
 	
 	oSFA = createUnoService(&quot;com.sun.star.ucb.SimpleFileAccess&quot;)
