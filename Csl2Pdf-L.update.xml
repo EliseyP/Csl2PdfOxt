@@ -5,15 +5,15 @@
  xmlns:l="http://libreoffice.org/extensions/description/2011"
  xmlns:xlink="http://www.w3.org/1999/xlink" >
    <identifier value="org.elisey.Csl2Pdf" />
-   <version value="0.0.4" />
+   <version value="0.0.5" />
    <dependencies>
-      <l:LibreOffice-minimal-version value="3.5" dep:name="LibreOffice 3.5 minimum, or more recent" />
+      <l:LibreOffice-minimal-version value="3.5" dep:name="LibreOffice 3,5 minimum, or more recent" />
    </dependencies>
    <update-download>
       <src xlink:href="https://github.com/EliseyP/Csl2PdfOxt/raw/main/Csl2Pdf.oxt" />
    </update-download>
    <publisher>
-      <name lang="en" xlink:href="https://github.com/EliseyP/Csl2PdfOxt/">Csl2Pdf</name>
-      <name lang="ru" xlink:href="https://github.com/EliseyP/Csl2PdfOxt/">Csl2Pdf</name>
+      <name lang="en" xlink:href="https://github.com/EliseyP/">AgripniSoft</name>
+      <name lang="ru" xlink:href="https://github.com/EliseyP/">AgripniSoft</name>
    </publisher>
 </description>
