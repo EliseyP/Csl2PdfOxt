@@ -143,9 +143,9 @@ Sub run(_para$)
 	EndIf
 	
 	If _para = &quot;red&quot; Then
-		params = &quot; -p&quot;
+		params = &quot; -p -G&quot;
 	ElseIf _para = &quot;black&quot; Then
-		params = &quot; -p -b&quot;
+		params = &quot; -p -b -G&quot;
 	ElseIf _para = &quot;gui&quot; Then
 		params = &quot; -g&quot;
 	End If 
