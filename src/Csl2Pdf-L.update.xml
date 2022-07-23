@@ -10,7 +10,7 @@
       <l:LibreOffice-minimal-version value="3.5" dep:name="LibreOffice 3,5 minimum, or more recent" />
    </dependencies>
    <update-download>
-      <src xlink:href="https://github.com/EliseyP/Csl2PdfOxt/raw/main/Csl2Pdf.oxt" />
+      <src xlink:href="https://github.com/EliseyP/Csl2PdfOxt/raw/main/Csl2Pdf-L-0.0.6.oxt" />
    </update-download>
    <publisher>
       <name lang="en" xlink:href="https://github.com/EliseyP/">EliseyP</name>
